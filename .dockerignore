@@ -1,0 +1,23 @@
+# Git
+.git
+.gitignore
+
+# Python Cache & Env
+__pycache__
+venv
+env
+.env
+myenv/
+
+# IDE
+.vscode
+.idea
+
+# Tests & Docs
+tests
+README.md
+docker-compose.yml
+
+# Data files (Dữ liệu sẽ được mount qua Volume, không copy cứng vào image)
+*.csv
+*.h5

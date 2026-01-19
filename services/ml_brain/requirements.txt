@@ -1,0 +1,17 @@
+# --- Web Framework ---
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+python-dotenv==1.0.1
+pydantic==2.9.2
+pydantic-settings==2.6.0
+
+# --- AI & Deep Learning (PyTorch) ---
+# Cài bản torch ổn định (CPU version mặc định, nếu có GPU nó sẽ tự nhận CUDA nếu cài đúng cách)
+torch==2.2.1            # Core library
+torchvision==0.17.1     # (Optional) Thường đi kèm bộ cài chuẩn
+scikit-learn==1.5.2     # Để dùng MinMaxScaler
+joblib==1.4.2           # Lưu Scaler
+
+# --- Data Handling ---
+pandas==2.2.2
+numpy==1.26.4           # Giữ ở bản 1.x để tương thích tốt nhất

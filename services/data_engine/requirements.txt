@@ -1,0 +1,18 @@
+# --- Web Framework ---
+fastapi==0.115.0        # Framework chính (Check version mới nhất ổn định)
+uvicorn[standard]==0.32.0 # ASGI Server để chạy app
+
+# --- Data Processing ---
+pandas==2.2.2           # Xử lý DataFrame
+numpy==1.26.4           # Tính toán số học (Lưu ý: Numpy 2.0 mới ra có thể conflict, dùng 1.x cho an toàn)
+pandas_ta==0.3.14b      # Phân tích kỹ thuật (RSI, MACD...)
+
+# --- Crypto API ---
+ccxt==4.4.25            # Thư viện lấy giá Coin tốt nhất hiện nay (Hỗ trợ Binance, Bybit...)
+python-dotenv==1.0.1    # Đọc file .env
+
+# --- Utilities ---
+requests==2.32.3        # Gọi HTTP đơn giản (nếu cần sync)
+httpx==0.27.0           # Gọi HTTP bất đồng bộ (Async client)
+pydantic==2.9.2         # Validate dữ liệu cực mạnh
+pydantic-settings==2.6.0 # Quản lý config từ .env

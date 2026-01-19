@@ -1,0 +1,45 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual Environment (Môi trường ảo của bạn)
+venv/
+env/
+.env
+.venv/
+myenv/
+
+# Environment Variables (Tuyệt đối không commit file chứa Key thật)
+.env
+.env.local
+
+# IDE Settings
+.vscode/
+.idea/
+*.swp
+
+# Distribution / Packaging
+build/
+dist/
+*.egg-info/
+
+# Docker
+docker-compose.override.yml
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Project specific: Heavy Data & Models (Không commit file nặng)
+*.csv
+*.xlsx
+*.h5
+*.keras
+*.pkl
+*.pt
+*.pth
+services/ml_brain/saved_models/*
+
+# Logs
+*.log
