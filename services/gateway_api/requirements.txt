@@ -6,7 +6,6 @@ pydantic>=2.9.2
 pydantic-settings>=2.6.0
 
 # --- Networking ---
-# Cần httpx để gọi API sang 2 service kia
 httpx>=0.27.0
 requests>=2.32.0
 
@@ -15,6 +14,6 @@ sqlalchemy>=2.0.30
 asyncpg>=0.30.0
 alembic>=1.13.0
 
-# --- Security (Optional - Chuẩn bị sẵn) ---
+# --- Security (Optional) ---
 python-jose[cryptography]
 passlib[bcrypt]

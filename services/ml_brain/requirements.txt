@@ -6,13 +6,10 @@ pydantic>=2.9.2
 pydantic-settings>=2.6.0
 
 # --- Data Processing ---
-# Đồng bộ phiên bản numpy với service trên
 numpy<2.0.0
 pandas>=2.2.0
 scikit-learn>=1.5.0
 joblib>=1.4.0
 
 # --- AI Core (PyTorch) ---
-# PyTorch bản CPU (nhẹ và ổn định cho dev).
-# Nếu muốn dùng GPU, pip sẽ tự nhận diện CUDA nếu máy có cài sẵn.
 torch>=2.2.0
