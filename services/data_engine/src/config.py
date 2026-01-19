@@ -2,49 +2,55 @@ import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    # --- 1. Cấu hình chung ---
+    # --- General Configuration---
     PROJECT_NAME: str = "Crypto Data Engine"
     VERSION: str = "1.0.0"
     API_PREFIX: str = "/api/v1"
-    
-    # --- 2. Cấu hình Binance ---
-    # Nếu không tìm thấy trong .env, sẽ mặc định là chuỗi rỗng (cho phép tải data public)
+
+    # --- Binance Configuration ---
     BINANCE_API_KEY: str = ""
     BINANCE_SECRET_KEY: str = ""
 
-    # --- 3. Cấu hình Database (PostgreSQL) ---
+    # --- 3. Database Configuration (PostgreSQL) ---
     POSTGRES_USER: str = "admin"
     POSTGRES_PASSWORD: str = "securepassword"
     POSTGRES_DB: str = "crypto_db"
-    # Mặc định là 'localhost' để chạy test bên ngoài Docker
-    # Khi chạy trong Docker, ta sẽ override biến này thành 'db' (tên service trong docker-compose)
+    # The default is 'localhost' to run tests outside of Docker.
+    # When running within Docker, we will override this variable to 'db' (the service name in docker-compose).
     POSTGRES_HOST: str = "localhost" 
     POSTGRES_PORT: int = 5432
 
-    # --- 4. Logic tạo URL kết nối ---
+    # --- 4. Logic create URL connect ---
     @property
     def DATABASE_URL_ASYNC(self) -> str:
         """
-        Tạo chuỗi kết nối cho driver Async (asyncpg).
-        Dùng cho SQLAlchemy phiên bản mới.
+        Create a connection string for the Async driver (asyncpg).
+        Use with the latest version of SQLAlchemy.
         Format: postgresql+asyncpg://user:pass@host:port/dbname
         """
         return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
-    # --- 5. Cấu hình Pydantic ---
+    # --- 5. Pydantic Configuration ---
     model_config = SettingsConfigDict(
-        # Tìm file .env ở thư mục gốc dự án (đi lên 3 cấp từ file này)
+        # Find the .env file in the project root directory (go up 3 levels from this file)
         # src -> data_engine -> services -> ROOT
-        env_file=os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), ".env"),
+        env_file=os.path.join(
+                    os.path.dirname(
+                        os.path.dirname(
+                            os.path.dirname(
+                                os.path.dirname(__file__)
+                            )
+                        )
+                    ), ".env"),
         env_file_encoding='utf-8',
         case_sensitive=True,
-        extra='ignore' # Bỏ qua các biến thừa trong .env (ví dụ biến của ML Service)
+        extra='ignore' #Ignore redundant variables in .env (e.g., ML Service variables)
     )
 
-# Khởi tạo instance duy nhất để dùng ở các file khác
+# Create a unique instance for use in other files.
 settings = Settings()
 
-# In ra để debug (Chỉ in khi chạy local, cẩn thận lộ key)
+# Debug: Print loaded settings (remove or comment out in production)
 if __name__ == "__main__":
     print(f"Loaded config for: {settings.PROJECT_NAME}")
     print(f"DB URL: {settings.DATABASE_URL_ASYNC}")
