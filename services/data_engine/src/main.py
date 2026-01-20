@@ -23,36 +23,40 @@ app = FastAPI(title="Crypto Data Engine", lifespan=lifespan)
 async def sync_data(
     symbol: str, 
     timeframe: str = "1h", 
-    limit: int = 1000,
-    start_date: Optional[str] = None, # Ví dụ: 2023-01-01
-    end_date: Optional[str] = None,   # Ví dụ: 2023-02-01
+    start_date: str = "2020-01-01", # Mặc định lấy từ 2020 để có nhiều dữ liệu
+    end_date: Optional[str] = None,
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Tải dữ liệu crypto. Có thể chỉ định ngày bắt đầu và kết thúc.
-    Format ngày: YYYY-MM-DD (Ví dụ: 2024-01-01)
+    Tải dữ liệu quy mô lớn (Massive Sync).
+    Mặc định lấy từ 01/01/2020 đến nay (~35,000 nến 1h, hoặc 140,000 nến 15m).
     """
     formatted_symbol = symbol.replace("-", "/").upper()
     
     loader = BinanceLoader()
-    # Truyền thêm start_date và end_date vào hàm
-    df = await loader.fetch_ohlcv(formatted_symbol, timeframe, limit, start_date, end_date)
+    
+    # Gọi hàm tải thông minh (Tự động pagination)
+    df = await loader.fetch_ohlcv(formatted_symbol, timeframe, start_date, end_date)
     
     if df.empty:
-        return {"status": "error", "message": "No data fetched or empty range"}
+        return {"status": "error", "message": "Không tải được dữ liệu nào."}
 
+    # Lưu vào DB (Bulk Upsert)
     repo = CandleRepository(db)
+    # Lưu ý: Hàm bulk_upsert cần xử lý tốt việc insert số lượng lớn
+    # Nếu quá chậm, SQLAlchemy có thể đơ. Nhưng với <100k rows thì vẫn ổn.
     count = await repo.bulk_upsert(df, formatted_symbol, timeframe)
     
     return {
         "status": "success",
         "symbol": formatted_symbol,
         "timeframe": timeframe,
-        "data_range": {
+        "total_candles": len(df),
+        "database_updated": count,
+        "range": {
             "start": str(df['timestamp'].min()),
             "end": str(df['timestamp'].max())
-        },
-        "rows_inserted": count
+        }
     }
 
 @app.get("/api/v1/debug/count")

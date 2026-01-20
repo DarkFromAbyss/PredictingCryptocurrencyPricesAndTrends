@@ -1,21 +1,18 @@
-# Sử dụng Python 3.9 (nhẹ và ổn định)
-FROM python:3.9-slim
+# Sử dụng Python 3.10 bản nhẹ (slim)
+FROM python:3.10-slim
 
-# Thiết lập thư mục làm việc
+# Thiết lập thư mục làm việc trong container
 WORKDIR /app
 
-# Copy file requirements trước để tận dụng Docker cache
+# Copy file thư viện trước để tận dụng Docker Cache
 COPY requirements.txt .
 
 # Cài đặt thư viện
-# Thêm --no-cache-dir để giảm dung lượng image
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy toàn bộ source code
-COPY . .
+# Copy toàn bộ mã nguồn vào
+COPY src/ src/
 
-# Mở port (Mặc định cho FastAPI là 8000 bên trong container)
-EXPOSE 8000
-
-# Lệnh chạy mặc định (Sẽ bị override bởi docker-compose, nhưng cứ để dự phòng)
+# Chạy App trên cổng 8000 (Cổng nội bộ container)
+# Lưu ý: docker-compose sẽ map cổng này ra 8001 ở máy thật
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
