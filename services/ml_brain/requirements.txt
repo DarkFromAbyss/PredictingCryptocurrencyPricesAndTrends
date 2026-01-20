@@ -1,0 +1,20 @@
+# --- Core API ---
+fastapi==0.109.0
+uvicorn==0.27.0
+pydantic-settings==2.1.0
+python-dotenv==1.0.1
+
+# --- Database ---
+sqlalchemy==2.0.25
+asyncpg==0.29.0
+
+# --- Data Science & AI ---
+pandas==2.2.0
+numpy==1.26.3
+scikit-learn==1.4.0
+matplotlib==3.8.2  # Để vẽ biểu đồ Loss/Price
+pyyaml==6.0.1      # Để đọc config.yaml
+
+# --- Deep Learning (CPU Version) ---
+# Dùng bản CPU để chạy trên Docker Desktop cho nhẹ
+torch==2.1.2 --index-url https://download.pytorch.org/whl/cpu

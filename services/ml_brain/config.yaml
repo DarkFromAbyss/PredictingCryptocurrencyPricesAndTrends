@@ -1,0 +1,66 @@
+# --- Cấu hình chung cho dữ liệu ---
+data:
+  # Độ dài chuỗi nến quá khứ để AI nhìn vào (Input Sequence)
+  sequence_length: 30  
+  # Số lượng đặc trưng đầu vào (Close, Open, High, Low, Vol + 6 Indicators)
+  input_size: 11       
+
+# --- CẤU HÌNH CHỈ BÁO KỸ THUẬT (NEW) ---
+indicators:
+  # Simple Moving Average (SMA)
+  sma_window: 20
+  
+  # Exponential Moving Average (EMA)
+  ema_window: 20
+  
+  # Relative Strength Index (RSI)
+  rsi_window: 14
+  
+  # Bollinger Bands
+  bb_window: 20
+  bb_std_dev: 2.0  # Độ lệch chuẩn
+  
+  # MACD (Moving Average Convergence Divergence)
+  macd_fast: 12
+  macd_slow: 26
+  macd_signal: 9      # Dự đoán 1 bước tương lai
+
+# --- 1. Mô hình LSTM Cơ bản ---
+lstm:
+  hidden_size: 128
+  num_layers: 3
+  dropout: 0.2
+
+# --- 2. Mô hình Hybrid (CNN + LSTM) ---
+# Dùng CNN để lọc nhiễu, trích xuất đặc trưng trước khi đưa vào LSTM
+hybrid:
+  conv_filters: 64         # Số bộ lọc CNN
+  conv_kernel_size: 3      # Kích thước cửa sổ trượt CNN
+  lstm_hidden_size: 256   # LSTM của Hybrid thường cần to hơn
+  num_layers: 3           # Thường chỉ cần 1 lớp LSTM sau CNN là đủ
+
+# --- 3. Mô hình Attention LSTM ---
+# Giúp AI biết tập trung vào thời điểm nào quan trọng trong quá khứ
+attention:
+  hidden_size: 128
+  num_layers: 3          # Attention layer sẽ xử lý phần còn lại
+  dropout: 0.2
+
+# --- CẤU HÌNH HUẤN LUYỆN (NEW) ---
+training:
+  # 1. Optimizer (adam, sgd, rmsprop)
+  optimizer: "adam"
+  learning_rate: 0.0005
+  weight_decay: 1e-5  # L2 Regularization để chống overfitting
+
+  # 2. Learning Rate Scheduler (Điều chỉnh tốc độ học)
+  # Options: "steplr", "plateau" (Giảm khi Loss không đổi), "none"
+  scheduler:
+    type: "steplr"
+    step_size: 50     # Giảm LR sau mỗi 10 epochs
+    gamma: 0.8        # Giảm đi 1 nửa (nhân với 0.5)
+
+  # 3. Early Stopping (Dừng sớm nếu không học được thêm)
+  early_stopping:
+    patience: 20      # Chờ 5 epoch, nếu không tốt hơn thì dừng
+    min_delta: 0.0001 # Cải thiện nhỏ hơn mức này coi như không cải thiện

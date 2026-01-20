@@ -1,21 +1,23 @@
-# Sử dụng Python 3.9 (nhẹ và ổn định)
-FROM python:3.9-slim
+FROM python:3.10-slim
 
-# Thiết lập thư mục làm việc
 WORKDIR /app
 
-# Copy file requirements trước để tận dụng Docker cache
-COPY requirements.txt .
+# Cài đặt thêm thư viện hệ thống (nếu cần cho Matplotlib/Numpy)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-# Cài đặt thư viện
-# Thêm --no-cache-dir để giảm dung lượng image
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy toàn bộ source code
-COPY . .
+# Copy mã nguồn
+COPY src/ src/
 
-# Mở port (Mặc định cho FastAPI là 8000 bên trong container)
-EXPOSE 8000
+# Copy file cấu hình quan trọng
+COPY config.yaml .
 
-# Lệnh chạy mặc định (Sẽ bị override bởi docker-compose, nhưng cứ để dự phòng)
+# Tạo thư mục để lưu Model và Biểu đồ
+RUN mkdir -p saved_models
+
+# Chạy App
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
