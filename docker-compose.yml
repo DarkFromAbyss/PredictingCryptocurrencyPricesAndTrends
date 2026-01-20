@@ -1,61 +1,86 @@
 version: '3.8'
 
 services:
-  # 1. DATABASE (Lưu dữ liệu lịch sử để đỡ phải gọi Binance liên tục)
+  # 1. DATABASE
   db:
     image: postgres:15-alpine
     container_name: crypto_db
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-admin}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
-      POSTGRES_DB: ${POSTGRES_DB:-crypto_db}
+    # Nạp biến môi trường trực tiếp từ file .env
+    env_file:
+      - .env
     ports:
-      - "5435:5432"
+      - "5435:5432" # Máy ngoài truy cập cổng 5435, nội bộ dùng 5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d crypto_db"] # Kiểm tra sức khỏe DB
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  # 2. DATA ENGINE (Xử lý dữ liệu)
+  # 2. DATA ENGINE
   data_engine:
     build:
       context: ./services/data_engine
     container_name: crypto_data_engine
     volumes:
-      - ./services/data_engine/src:/app/src  # Hot-reload code khi sửa
+      - ./services/data_engine/src:/app/src
     ports:
       - "${DATA_SERVICE_PORT:-8001}:8000"
-    environment:
-      - BINANCE_API_KEY=${BINANCE_API_KEY}
-    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
 
-  # 3. ML BRAIN (Trí tuệ nhân tạo)
+  # 3. ML BRAIN
   ml_brain:
     build:
       context: ./services/ml_brain
     container_name: crypto_ml_brain
     volumes:
-      - ./services/ml_brain/src:/app/src      # Hot-reload code
-      - ./services/ml_brain/saved_models:/app/saved_models # Lưu model ra ngoài
+      - ./services/ml_brain/src:/app/src
+      - ./services/ml_brain/saved_models:/app/saved_models
     ports:
       - "${ML_SERVICE_PORT:-8002}:8000"
-    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    deploy:
+      resources:
+        limits:
+          memory: 4G
 
-  # 4. API GATEWAY (Cổng chính cho Web/Frontend)
+  # 4. API GATEWAY
   gateway:
     build:
-      context: ./services/gateway_api
+      context: ./services/gateway
     container_name: crypto_gateway
     ports:
       - "${GATEWAY_PORT:-8000}:8000"
-    volumes:
-      - ./services/gateway_api/src:/app/src
     environment:
-      - DATA_SERVICE_URL=http://data_engine:8000
-      - ML_SERVICE_URL=http://ml_brain:8000
+      - DATA_ENGINE_URL=http://data_engine:8000
+      - ML_BRAIN_URL=http://ml_brain:8000
     depends_on:
       - data_engine
       - ml_brain
     command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+  
+  # 5. DASHBOARD
+  dashboard:
+    build:
+      context: ./services/dashboard
+    container_name: crypto_dashboard
+    ports:
+      - "8501:8501"
+    environment:
+      - GATEWAY_URL=http://gateway:8000 
+    depends_on:
+      - gateway
+    volumes:
+      - ./services/ml_brain/saved_models:/app/saved_models
 
-# Volume để lưu dữ liệu DB bền vững
 volumes:
   postgres_data:
